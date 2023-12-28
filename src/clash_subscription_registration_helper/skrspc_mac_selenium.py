@@ -3,7 +3,7 @@ import time
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
-from util import get_username, get_email, get_password
+from util import generate_random_username, generate_random_email, generate_random_password
 
 
 def register_skrspc_account():
@@ -17,7 +17,7 @@ def register_skrspc_account():
     driver = webdriver.Chrome()
     driver.get(link)
 
-    username, email, password = get_username(), get_email(), get_password()
+    username, email, password = generate_random_username(), generate_random_email(), generate_random_password()
 
     info = 'link: %s username: %s email: %s password: %s\n' % (link, username, email, password)
     print(info)

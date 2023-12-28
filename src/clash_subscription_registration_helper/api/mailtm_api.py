@@ -1,0 +1,98 @@
+# -*- coding: utf-8 -*-
+
+import json
+import time
+
+import requests
+
+from src.clash_subscription_registration_helper.util import generate_random_username, generate_random_password, \
+    generate_http_request_headers
+
+
+def get_domain() -> str:
+    res = requests.get('https://api.mail.tm/domains')
+    res = json.loads(res.text)
+    domain = res['hydra:member'][0]['domain']
+    return domain
+
+
+def create_mailtm_account() -> tuple[str, str]:
+    address = f'{generate_random_username().lower()}@{get_domain()}'
+    password = generate_random_password()
+    requests.post(f'https://api.mail.tm/accounts', json={'address': address, 'password': password})
+    print('mail.tm account created, username: ' + address + ', password: ' + password)
+    return address, password
+
+
+def get_token(address: str, password: str) -> str:
+    res = requests.post(f'https://api.mail.tm/token', json={'address': address, 'password': password})
+    res = json.loads(res.text)
+    token = res['token']
+    return token
+
+
+def send_verification_code_to_email(email: str) -> None:
+    link = 'https://pnod.top/api/v1/passport/comm/sendEmailVerify'
+    res = requests.post(link, json={'email': email}, headers=generate_http_request_headers())
+    print('-' * 50)
+    print('sending verification code to email:' + email)
+    print('result:')
+    print(res.text)
+    print('-' * 50)
+
+
+def get_verification_code(address: str, password: str) -> str:
+    t = 0
+    while True:
+        t += 1
+        if t > 60:
+            return get_verification_code(address, password)
+        token = get_token(address, password)
+        res = requests.get(f'https://api.mail.tm/messages', headers={'Authorization': f'Bearer {token}'})
+        res = json.loads(res.text)
+        if len(res['hydra:member']) > 0:
+            content = res['hydra:member'][0]['intro']
+            code = ''
+            i = 0
+            while i < len(content):
+                if content[i].isdigit():
+                    j = i + 1
+                    while j < len(content):
+                        if content[j].isdigit():
+                            j += 1
+                        else:
+                            break
+                    code = content[i:j]
+                    break
+                i += 1
+            return code
+        time.sleep(1)
+
+
+def register_panda_node_account(email: str, verification_code: str, password: str) -> None:
+    link = 'https://pnod.top/api/v1/passport/auth/register'
+    res = requests.post(link, json={'email': email, 'email_code': verification_code, 'password': password},
+                        headers=generate_http_request_headers())
+    print(res.text)
+
+
+if __name__ == '__main__':
+    email_address, email_password = create_mailtm_account()
+    print('email_address: ' + email_address, ' email_password: ' + email_password)
+
+    info = 'mail.tm email_address: ' + email_address + ' email_password: ' + email_password
+    with open('info.txt', 'w') as f:
+        f.write(info)
+        f.write('\n')
+
+    send_verification_code_to_email(email_address)
+    verification_code = get_verification_code(email_address, email_password)
+
+    print('verification_code: ' + verification_code)
+
+    panda_password = generate_random_password()
+    print('panda_password: ' + panda_password)
+    with open('info.txt', 'a') as f:
+        f.write(panda_password)
+        f.write('\n')
+    register_panda_node_account(email_address, verification_code, panda_password)

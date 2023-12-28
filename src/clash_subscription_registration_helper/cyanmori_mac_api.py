@@ -5,7 +5,7 @@ from urllib.parse import unquote
 
 import requests
 
-from util import get_http_request_headers, get_username, get_email, get_password
+from util import generate_http_request_headers, generate_random_username, generate_random_email, generate_random_password
 
 
 def download_subscription_configuration_file(link: str) -> None:
@@ -36,7 +36,7 @@ def download_subscription_configuration_file(link: str) -> None:
 
 def register() -> tuple[str, str]:
     registration_api = 'https://pslc.cccc.gg/auth/register'
-    username, email, password = get_username(), get_email(), get_password()
+    username, email, password = generate_random_username(), generate_random_email(), generate_random_password()
 
     info = 'link: %s username: %s email: %s password: %s\n' % (registration_api, username, email, password)
     print(info)
@@ -44,7 +44,7 @@ def register() -> tuple[str, str]:
     f.write(info)
     f.close()
 
-    res = requests.post(url=registration_api, headers=get_http_request_headers(), json={
+    res = requests.post(url=registration_api, headers=generate_http_request_headers(), json={
         'name': username,
         'email': email,
         'passwd': password,
@@ -70,7 +70,7 @@ def parse_dict_cookies(cookies):
 def main() -> None:
     login_api = 'https://dd52.cccc.gg/auth/login'
     email, password = register()
-    res = requests.post(url=login_api, headers=get_http_request_headers(), json={
+    res = requests.post(url=login_api, headers=generate_http_request_headers(), json={
         'email': email,
         'passwd': password,
     })
@@ -79,7 +79,7 @@ def main() -> None:
 
     res = requests.get(
         url=user_profile_api,
-        headers=get_http_request_headers(),
+        headers=generate_http_request_headers(),
         cookies=parse_dict_cookies(res.cookies)
     )
 
