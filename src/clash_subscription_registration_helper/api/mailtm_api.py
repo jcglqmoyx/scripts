@@ -5,8 +5,7 @@ import time
 
 import requests
 
-from src.clash_subscription_registration_helper.util import generate_random_username, generate_random_password, \
-    generate_http_request_headers
+from src.clash_subscription_registration_helper.util import generate_random_username, generate_random_password
 
 
 def get_domain() -> str:
@@ -29,16 +28,6 @@ def get_token(address: str, password: str) -> str:
     res = json.loads(res.text)
     token = res['token']
     return token
-
-
-def send_verification_code_to_email(email: str) -> None:
-    link = 'https://pnod.top/api/v1/passport/comm/sendEmailVerify'
-    res = requests.post(link, json={'email': email}, headers=generate_http_request_headers())
-    print('-' * 50)
-    print('sending verification code to email:' + email)
-    print('result:')
-    print(res.text)
-    print('-' * 50)
 
 
 def get_verification_code(address: str, password: str) -> str:
@@ -67,5 +56,3 @@ def get_verification_code(address: str, password: str) -> str:
                 i += 1
             return code
         time.sleep(1)
-
-
