@@ -1,37 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import os
-from urllib.parse import unquote
-
 import requests
 
-from util import generate_http_request_headers, generate_random_username, generate_random_email, generate_random_password
-
-
-def download_subscription_configuration_file(link: str) -> None:
-    response = requests.get(link)
-    save_path = '/Users/hqc/.config/clash'
-
-    if response.status_code == 200:
-        # 从Content-Disposition中获取文件名
-        content_disposition = response.headers.get('Content-Disposition', '')
-        file_name = unquote(content_disposition.split('filename=')[1].strip('\"'))
-
-        # 如果Content-Disposition中没有文件名，则从URL中提取
-        if not file_name:
-            file_name = os.path.basename(link)
-
-        # 拼接保存路径
-        save_file_path = os.path.join(save_path, file_name)
-
-        # 保存文件
-        with open(save_file_path, 'wb') as file:
-            file.write(response.content)
-
-        print(f"File downloaded: {save_file_path}")
-    else:
-        print(f"Failed to download file. Status code: {response.status_code}")
-        return None
+from util import generate_http_request_headers, generate_random_username, generate_random_email, \
+    generate_random_password, download_subscription_configuration_file
 
 
 def register() -> tuple[str, str]:
