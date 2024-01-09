@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import os
 import time
 from random import randint
 from typing import List
@@ -149,3 +150,4 @@ if __name__ == '__main__':
     token = login_panda_node_account(email_address, panda_password)
     subscription_link = 'https://www.dnod.top/api/v1/client/subscribe?token=' + token
     print('subscription link: ', subscription_link)
+    os.system('open %s' % subscription_link)
